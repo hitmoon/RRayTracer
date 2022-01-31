@@ -1,5 +1,8 @@
 use std::io::{self, Write};
+use vec3::Color;
 mod vec3;
+mod color;
+
 
 fn main() {
     // Image
@@ -17,11 +20,8 @@ fn main() {
             let r = i as f64 / (image_width - 1) as f64;
             let g = j as f64 / (image_height - 1) as f64;
             let b = 0.25;
-            let ir = (255.999 * r) as i32;
-            let ig = (255.999 * g) as i32;
-            let ib = (255.999 * b) as i32;
-
-            println!("{} {} {}", ir, ig, ib);
+            let pixel_color = Color { e: [r, g, b] };
+            color::write_color(&mut std::io::stdout(), pixel_color).unwrap();
         }
     }
 
