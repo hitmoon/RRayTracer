@@ -5,6 +5,7 @@ mod vec3;
 mod color;
 mod ray;
 mod sphere;
+mod hittable;
 
 
 fn main() {
