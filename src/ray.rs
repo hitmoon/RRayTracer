@@ -1,6 +1,7 @@
 use crate::vec3::Point3;
 use crate::vec3;
 use crate::vec3::Color;
+use crate::sphere;
 
 pub struct Ray {
 
@@ -37,6 +38,12 @@ impl Ray {
     }
 
     pub fn ray_color(&self) -> Color {
+
+        let center = Point3 { e: [0.0, 0.0, -1.0] };
+
+        if sphere::hit_sphere(&center, 0.5, &self) {
+            return Color { e: [1.0, 0.0, 0.0] };
+        }
 
         let color = Color { e: [1.0, 1.0, 1.0] };
         let color2 = Color { e: [0.5, 0.7, 1.0]};

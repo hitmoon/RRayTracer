@@ -5,6 +5,7 @@ use ray::Ray;
 mod vec3;
 mod color;
 mod ray;
+mod sphere;
 
 
 fn main() {
