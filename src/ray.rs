@@ -41,8 +41,11 @@ impl Ray {
 
         let center = Point3 { e: [0.0, 0.0, -1.0] };
 
-        if sphere::hit_sphere(&center, 0.5, &self) {
-            return Color { e: [1.0, 0.0, 0.0] };
+        let t = sphere::hit_sphere(&center, 0.5, &self);
+        if t > 0.0 {
+            let n = (self.at(t) - center).unit_vector();
+            let c = Color { e: [n.x() + 1.0, n.y() + 1.0, n.z() + 1.0] };
+            return c * 0.5;
         }
 
         let color = Color { e: [1.0, 1.0, 1.0] };

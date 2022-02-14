@@ -1,5 +1,4 @@
 use std::io::{self, Write};
-use vec3::Color;
 use vec3::Point3;
 use ray::Ray;
 mod vec3;
