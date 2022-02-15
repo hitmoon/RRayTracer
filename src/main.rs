@@ -1,6 +1,8 @@
 use std::io::{self, Write};
 use vec3::Point3;
 use ray::Ray;
+use sphere::Sphere;
+use world::World;
 mod vec3;
 mod color;
 mod ray;
@@ -15,6 +17,10 @@ fn main() {
     let image_width = 400;
     let image_height = (image_width as f64 / aspect_ratio) as i32;
 
+    // World
+    let mut world = World::new();
+    world.add(Sphere::from(&Point3 {e: [0.0, 0.0, -1.0] }, 0.5));
+    world.add(Sphere::from(&Point3 {e: [0.0, -100.5, -1.0] }, 100.0));
 
     // Camera
     let viewport_height = 2.0;
@@ -38,7 +44,7 @@ fn main() {
             let v = j as f64 / (image_height - 1) as f64;
             let r = Ray::cons(&origin, &(lower_left_corner + horizontal * u + vertical * v - origin));
 
-            let pixel_color = r.ray_color();
+            let pixel_color = r.ray_color(&world);
             color::write_color(&mut std::io::stdout(), pixel_color).unwrap();
         }
     }

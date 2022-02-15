@@ -1,7 +1,8 @@
 use crate::vec3::Point3;
 use crate::vec3;
 use crate::vec3::Color;
-use crate::sphere;
+use crate::hittable::Hittable;
+use crate::hittable::HitRecord;
 
 pub struct Ray {
 
@@ -37,15 +38,12 @@ impl Ray {
         self.orig + self.dir * t
     }
 
-    pub fn ray_color(&self) -> Color {
+    pub fn ray_color(&self, world: &dyn Hittable) -> Color {
+        let mut rec = HitRecord::new();
 
-        let center = Point3 { e: [0.0, 0.0, -1.0] };
-
-        let t = sphere::hit_sphere(&center, 0.5, &self);
-        if t > 0.0 {
-            let n = (self.at(t) - center).unit_vector();
-            let c = Color { e: [n.x() + 1.0, n.y() + 1.0, n.z() + 1.0] };
-            return c * 0.5;
+        if world.hit(self, 0.0, f64::INFINITY, &mut rec) {
+            let color = Color { e: [1.0, 1.0, 1.0] };
+            return (rec.normal + color) * 0.5;
         }
 
         let color = Color { e: [1.0, 1.0, 1.0] };
