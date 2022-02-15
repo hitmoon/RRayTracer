@@ -10,6 +10,7 @@ mod sphere;
 mod hittable;
 mod world;
 mod util;
+mod camera;
 
 fn main() {
     // Image
