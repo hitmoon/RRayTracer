@@ -35,7 +35,7 @@ impl Hittable for Sphere {
         let sqrtd = f64::sqrt(discriminant);
 
         // Find the nearest root that lies in the acceptable range.
-        let root = (-half_b - sqrtd) / a;
+        let mut root = (-half_b - sqrtd) / a;
         if root < t_min || t_max < root {
             root = (-half_b + sqrtd) / a;
             if root < t_min || t_max < root {
