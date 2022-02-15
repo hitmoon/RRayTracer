@@ -1,4 +1,5 @@
 use std::ops::{Add,Sub,Mul,Div,Neg,Index};
+use crate::util;
 
 #[derive(Copy, Clone)]
 pub struct Vec3 {
@@ -49,6 +50,24 @@ impl Vec3 {
 
     pub fn unit_vector(&self) -> Self {
         self.clone() / self.length()
+    }
+
+    pub fn random() -> Vec3 {
+        Vec3 { e: [util::random_double(), util::random_double(), util::random_double()] }
+    }
+
+    pub fn random_range(min: f64, max: f64) -> Vec3 {
+        Vec3 { e: [util::random_double_range(min, max), util::random_double_range(min, max), util::random_double_range(min, max)] }
+    }
+
+    pub fn random_in_unit_sphere() -> Vec3 {
+        loop {
+            let p = Vec3::random_range(-1.0, 1.0);
+            if p.length_squared() >= 1.0 {
+                continue;
+            }
+            return p;
+        }
     }
 }
 

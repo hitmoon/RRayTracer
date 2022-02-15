@@ -20,6 +20,7 @@ fn main() {
     let image_width = 400;
     let image_height = (image_width as f64 / aspect_ratio) as i32;
     let samples_per_pixel: i32 = 100;
+    let max_depth = 50;
 
     // World
     let mut world = World::new();
@@ -44,7 +45,7 @@ fn main() {
                 let u = (i as f64 + util::random_double()) / (image_width - 1) as f64;
                 let v = (j as f64 + util::random_double()) / (image_height - 1) as f64;
                 let r = cam.get_ray(u, v);
-                pixel_color = pixel_color + r.ray_color(&world);
+                pixel_color = pixel_color + r.ray_color(&world, max_depth);
             }
             color::write_color(&mut std::io::stdout(), pixel_color, samples_per_pixel).unwrap();
         }

@@ -38,12 +38,18 @@ impl Ray {
         self.orig + self.dir * t
     }
 
-    pub fn ray_color(&self, world: &dyn Hittable) -> Color {
+    pub fn ray_color(&self, world: &dyn Hittable, depth: i32) -> Color {
         let mut rec = HitRecord::new();
 
+        // If we've exceeded the ray bounce limit, no more light is gathered.
+        if depth <= 0 {
+            return Color::new();
+        }
+
         if world.hit(self, 0.0, f64::INFINITY, &mut rec) {
-            let color = Color { e: [1.0, 1.0, 1.0] };
-            return (rec.normal + color) * 0.5;
+            let target = rec.p + rec.normal + vec3::Vec3::random_in_unit_sphere();
+            let ray = Ray::cons(&rec.p, &(target - rec.p));
+            return ray.ray_color(world, depth - 1) * 0.5;
         }
 
         let color = Color { e: [1.0, 1.0, 1.0] };
