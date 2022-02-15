@@ -9,9 +9,9 @@ pub struct World {
 impl Hittable for World {
 
     fn hit(&self, r: &Ray, t_min: f64, t_max: f64, rec: &mut HitRecord) -> bool {
-        let mut temp_rec: HitRecord;
-        let hit_anything = false;
-        let closest_so_far = t_max;
+        let mut temp_rec = HitRecord::new();
+        let mut hit_anything = false;
+        let mut closest_so_far = t_max;
 
         for obj in self.objects.iter() {
             if obj.hit(r, t_min, closest_so_far, &mut temp_rec) {
@@ -31,11 +31,11 @@ impl World {
         World { objects: Vec::new() }
     }
 
-    pub fn add<T: 'static + Hittable> (&self, object: T) {
+    pub fn add<T: 'static + Hittable> (&mut self, object: T) {
         self.objects.push(Box::new(object))
     }
 
-    pub fn clear(&self) {
+    pub fn clear(&mut self) {
         self.objects.clear();
     }
 }
