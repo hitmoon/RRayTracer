@@ -1,6 +1,6 @@
 use std::ops::{Add,Sub,Mul,Div,Neg,Index};
 
-#[derive(Copy)]
+#[derive(Copy, Clone)]
 pub struct Vec3 {
 
     pub e: [f64; 3],
@@ -96,8 +96,3 @@ impl Index<usize> for Vec3 {
     }
 }
 
-impl Clone for Vec3 {
-    fn clone(&self) -> Self {
-        Vec3 { e : [self.e[0], self.e[1], self.e[2]] }
-    }
-}
