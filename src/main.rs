@@ -9,7 +9,7 @@ mod ray;
 mod sphere;
 mod hittable;
 mod world;
-
+mod util;
 
 fn main() {
     // Image
