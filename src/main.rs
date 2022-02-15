@@ -6,6 +6,7 @@ mod color;
 mod ray;
 mod sphere;
 mod hittable;
+mod world;
 
 
 fn main() {
