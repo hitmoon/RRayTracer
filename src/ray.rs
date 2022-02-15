@@ -46,7 +46,7 @@ impl Ray {
             return Color::new();
         }
 
-        if world.hit(self, 0.0, f64::INFINITY, &mut rec) {
+        if world.hit(self, 0.001, f64::INFINITY, &mut rec) {
             let target = rec.p + rec.normal + vec3::Vec3::random_in_unit_sphere();
             let ray = Ray::cons(&rec.p, &(target - rec.p));
             return ray.ray_color(world, depth - 1) * 0.5;
