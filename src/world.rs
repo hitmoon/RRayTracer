@@ -8,20 +8,24 @@ pub struct World {
 
 impl Hittable for World {
 
-    fn hit(&self, r: &Ray, t_min: f64, t_max: f64, rec: &mut HitRecord) -> bool {
-        let mut temp_rec = HitRecord::new();
+    fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> (bool, Option<HitRecord>) {
+        let mut temp_rec = None;
         let mut hit_anything = false;
         let mut closest_so_far = t_max;
 
         for obj in self.objects.iter() {
-            if obj.hit(r, t_min, closest_so_far, &mut temp_rec) {
+            let (hitted, rec) = obj.hit(r, t_min, closest_so_far);
+            if hitted {
                 hit_anything = true;
-                closest_so_far = temp_rec.t;
-                *rec = temp_rec;
+                closest_so_far = match &rec {
+                    Some(rec) => rec.t,
+                    None => panic!("should have a value"),
+                };
+                temp_rec = rec;
             }
         }
 
-        return hit_anything;
+        (hit_anything, temp_rec)
     }
 }
 

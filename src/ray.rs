@@ -2,7 +2,6 @@ use crate::vec3::Point3;
 use crate::vec3;
 use crate::vec3::Color;
 use crate::hittable::Hittable;
-use crate::hittable::HitRecord;
 
 pub struct Ray {
 
@@ -39,14 +38,18 @@ impl Ray {
     }
 
     pub fn ray_color(&self, world: &dyn Hittable, depth: i32) -> Color {
-        let mut rec = HitRecord::new();
-
         // If we've exceeded the ray bounce limit, no more light is gathered.
         if depth <= 0 {
             return Color::new();
         }
 
-        if world.hit(self, 0.001, f64::INFINITY, &mut rec) {
+        let (hitted, ret) =  world.hit(self, 0.001, f64::INFINITY);
+        if hitted {
+            let rec = match ret {
+                Some(rec) => rec,
+                None => panic!("should have a vaule"),
+            };
+
             let target = rec.p + rec.normal + vec3::Vec3::random_in_hemisphere(&rec.normal);
             let ray = Ray::cons(&rec.p, &(target - rec.p));
             return ray.ray_color(world, depth - 1) * 0.5;

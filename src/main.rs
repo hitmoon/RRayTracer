@@ -1,6 +1,5 @@
 use std::io::{self, Write};
 use vec3::Point3;
-use ray::Ray;
 use sphere::Sphere;
 use world::World;
 use camera::Camera;
