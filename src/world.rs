@@ -35,8 +35,8 @@ impl World {
         World { objects: Vec::new() }
     }
 
-    pub fn add<T: 'static + Hittable> (&mut self, object: T) {
-        self.objects.push(Box::new(object))
+    pub fn add (&mut self, object: Box<dyn Hittable>) {
+        self.objects.push(object);
     }
 
     pub fn clear(&mut self) {

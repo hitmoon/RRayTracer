@@ -23,8 +23,8 @@ fn main() {
 
     // World
     let mut world = World::new();
-    world.add(Sphere::from(&Point3 {e: [0.0, 0.0, -1.0] }, 0.5));
-    world.add(Sphere::from(&Point3 {e: [0.0, -100.5, -1.0] }, 100.0));
+    world.add(Box::new(Sphere::from(&Point3 {e: [0.0, 0.0, -1.0] }, 0.5)));
+    world.add(Box::new(Sphere::from(&Point3 {e: [0.0, -100.5, -1.0] }, 100.0)));
 
     // Camera
     let cam = Camera::new();
