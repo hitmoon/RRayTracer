@@ -18,6 +18,10 @@ impl Vec3 {
         Vec3 { e: [0.0, 0.0, 0.0]}
     }
 
+    pub fn from(x: f64, y: f64, z: f64) -> Vec3 {
+        Vec3 { e: [x, y, z] }
+    }
+
     pub fn x(&self) -> f64 {
         self.e[0].clone()
     }
@@ -82,6 +86,16 @@ impl Vec3 {
 
         -in_unit_sphere
     }
+
+    pub fn near_zero(self) -> bool {
+        // Return true if the vector is close to zero in all dimensions
+        let s = 1e-8;
+        return self.e[0].abs() < s && self.e[1].abs() < s && self.e[2].abs() < s;
+    }
+
+    pub fn reflect(v: &Vec3, n: &Vec3) -> Vec3 {
+        *v - *n * v.dot(n) * 2.0
+    }
 }
 
 impl Add for Vec3 {
@@ -103,6 +117,13 @@ impl Mul<f64> for Vec3 {
     type Output = Self;
     fn mul(self, t: f64) -> Self {
        Vec3 { e: [self.e[0] * t, self.e[1] * t, self.e[2] * t] }
+    }
+}
+
+impl Mul<Vec3> for Vec3 {
+    type Output = Self;
+    fn mul(self, v: Vec3) -> Self {
+        Vec3 { e: [self.e[0] * v.e[0], self.e[1] * v.e[1], self.e[2] * v.e[2]] }
     }
 }
 

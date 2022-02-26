@@ -4,6 +4,9 @@ use sphere::Sphere;
 use world::World;
 use camera::Camera;
 use vec3::Color;
+use material::Lambertian;
+use material::Metal;
+use std::rc::Rc;
 mod vec3;
 mod color;
 mod ray;
@@ -12,6 +15,7 @@ mod hittable;
 mod world;
 mod util;
 mod camera;
+mod material;
 
 fn main() {
     // Image
@@ -23,8 +27,16 @@ fn main() {
 
     // World
     let mut world = World::new();
-    world.add(Box::new(Sphere::from(&Point3 {e: [0.0, 0.0, -1.0] }, 0.5)));
-    world.add(Box::new(Sphere::from(&Point3 {e: [0.0, -100.5, -1.0] }, 100.0)));
+
+    let ground = Rc::new(Lambertian::new(&Color::from(0.8, 0.8, 0.0)));
+    let center = Rc::new(Lambertian::new(&Color::from(0.7, 0.3, 0.3)));
+    let left = Rc::new(Metal::new(&Color::from(0.8, 0.8, 0.8)));
+    let right = Rc::new(Metal::new(&Color::from(0.8, 0.6, 0.2)));
+
+    world.add(Box::new(Sphere::from(&Point3::from(0.0, -100.5, -1.0), 100.0, ground)));
+    world.add(Box::new(Sphere::from(&Point3::from(0.0, 0.0, -1.0), 0.5, center)));
+    world.add(Box::new(Sphere::from(&Point3::from(-1.0, 0.0, -1.0), 0.5, left)));
+    world.add(Box::new(Sphere::from(&Point3::from(1.0, 0.0, -1.0), 0.5, right)));
 
     // Camera
     let cam = Camera::new();

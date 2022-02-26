@@ -50,9 +50,14 @@ impl Ray {
                 None => panic!("should have a vaule"),
             };
 
-            let target = rec.p + rec.normal + vec3::Vec3::random_in_hemisphere(&rec.normal);
-            let ray = Ray::cons(&rec.p, &(target - rec.p));
-            return ray.ray_color(world, depth - 1) * 0.5;
+            let mut scattered = Ray::new();
+            let mut attenuation = Color::new();
+
+            if rec.mat.scatter(self, &rec, &mut attenuation, &mut scattered) {
+                return attenuation * scattered.ray_color(world, depth - 1);
+            }
+
+            return Color::new();
         }
 
         let color = Color { e: [1.0, 1.0, 1.0] };
