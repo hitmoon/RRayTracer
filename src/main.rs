@@ -1,5 +1,6 @@
 use std::io::{self, Write};
 use vec3::Point3;
+use vec3::Vec3;
 use sphere::Sphere;
 use world::World;
 use camera::Camera;
@@ -30,13 +31,13 @@ fn main() {
     // World
     let R = f64::cos(f64::consts::PI / 4.0);
     let mut world = World::new();
-
+    /*
     let left = Rc::new(Lambertian::new(&Color::from(0.0, 0.0, 1.0)));
     let right = Rc::new(Lambertian::new(&Color::from(1.0, 0.0, 0.0)));
 
     world.add(Box::new(Sphere::from(&Point3::from(-R, 0.0, -1.0), R, left.clone())));
     world.add(Box::new(Sphere::from(&Point3::from(R, 0.0, -1.0), R, right.clone())));
-    /*
+    */
     let ground = Rc::new(Lambertian::new(&Color::from(0.8, 0.8, 0.0)));
     let center = Rc::new(Lambertian::new(&Color::from(0.1, 0.2, 0.5)));
     let left = Rc::new(Dielectric::new(1.5));
@@ -45,12 +46,13 @@ fn main() {
     world.add(Box::new(Sphere::from(&Point3::from(0.0, -100.5, -1.0), 100.0, ground)));
     world.add(Box::new(Sphere::from(&Point3::from(0.0, 0.0, -1.0), 0.5, center)));
     world.add(Box::new(Sphere::from(&Point3::from(-1.0, 0.0, -1.0), 0.5, left.clone())));
-    world.add(Box::new(Sphere::from(&Point3::from(-1.0, 0.0, -1.0), -0.4, left.clone())));
+    world.add(Box::new(Sphere::from(&Point3::from(-1.0, 0.0, -1.0), -0.45, left.clone())));
     world.add(Box::new(Sphere::from(&Point3::from(1.0, 0.0, -1.0), 0.5, right)));
-    */
 
     // Camera
-    let cam = Camera::new(90.0, aspect_ratio);
+    let cam = Camera::new(&Point3::from(-2.0, 2.0, 1.0),
+                          &Point3::from(0.0, 0.0,-1.0), &Vec3::from(0.0, 1.0, 0.0),
+                          90.0, aspect_ratio);
 
     // Render
 
