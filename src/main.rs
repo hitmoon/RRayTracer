@@ -8,6 +8,7 @@ use material::Lambertian;
 use material::Metal;
 use material::Dielectric;
 use std::rc::Rc;
+use std::f64;
 mod vec3;
 mod color;
 mod ray;
@@ -27,8 +28,15 @@ fn main() {
     let max_depth = 50;
 
     // World
+    let R = f64::cos(f64::consts::PI / 4.0);
     let mut world = World::new();
 
+    let left = Rc::new(Lambertian::new(&Color::from(0.0, 0.0, 1.0)));
+    let right = Rc::new(Lambertian::new(&Color::from(1.0, 0.0, 0.0)));
+
+    world.add(Box::new(Sphere::from(&Point3::from(-R, 0.0, -1.0), R, left.clone())));
+    world.add(Box::new(Sphere::from(&Point3::from(R, 0.0, -1.0), R, right.clone())));
+    /*
     let ground = Rc::new(Lambertian::new(&Color::from(0.8, 0.8, 0.0)));
     let center = Rc::new(Lambertian::new(&Color::from(0.1, 0.2, 0.5)));
     let left = Rc::new(Dielectric::new(1.5));
@@ -39,9 +47,10 @@ fn main() {
     world.add(Box::new(Sphere::from(&Point3::from(-1.0, 0.0, -1.0), 0.5, left.clone())));
     world.add(Box::new(Sphere::from(&Point3::from(-1.0, 0.0, -1.0), -0.4, left.clone())));
     world.add(Box::new(Sphere::from(&Point3::from(1.0, 0.0, -1.0), 0.5, right)));
+    */
 
     // Camera
-    let cam = Camera::new();
+    let cam = Camera::new(90.0, aspect_ratio);
 
     // Render
 
