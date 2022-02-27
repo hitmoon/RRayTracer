@@ -1,7 +1,7 @@
 use crate::vec3::Point3;
 use crate::vec3;
 use crate::vec3::Color;
-use crate::hittable::Hittable;
+use crate::world::World;
 
 pub struct Ray {
 
@@ -37,7 +37,7 @@ impl Ray {
         self.orig + self.dir * t
     }
 
-    pub fn ray_color(&self, world: &dyn Hittable, depth: i32) -> Color {
+    pub fn ray_color(&self, world: &World, depth: i32) -> Color {
         // If we've exceeded the ray bounce limit, no more light is gathered.
         if depth <= 0 {
             return Color::new();

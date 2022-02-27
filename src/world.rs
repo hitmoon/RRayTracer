@@ -6,9 +6,21 @@ pub struct World {
     objects: Vec<Box<dyn Hittable>>
 }
 
-impl Hittable for World {
+impl World {
 
-    fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> (bool, Option<HitRecord>) {
+    pub fn new() -> World {
+        World { objects: Vec::new() }
+    }
+
+    pub fn add (&mut self, object: Box<dyn Hittable>) {
+        self.objects.push(object);
+    }
+
+    pub fn clear(&mut self) {
+        self.objects.clear();
+    }
+
+    pub fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> (bool, Option<HitRecord>) {
         let mut temp_rec = None;
         let mut hit_anything = false;
         let mut closest_so_far = t_max;
@@ -26,20 +38,5 @@ impl Hittable for World {
         }
 
         (hit_anything, temp_rec)
-    }
-}
-
-impl World {
-
-    pub fn new() -> World {
-        World { objects: Vec::new() }
-    }
-
-    pub fn add (&mut self, object: Box<dyn Hittable>) {
-        self.objects.push(object);
-    }
-
-    pub fn clear(&mut self) {
-        self.objects.clear();
     }
 }
