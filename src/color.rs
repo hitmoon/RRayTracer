@@ -15,6 +15,8 @@ pub fn write_color<T> (out: &mut T, pixel_color: Color, samples_per_pixel: i32) 
     g = (util::clamp(f64::sqrt(g as f64 * scale), 0.0, 0.999) * 256.0) as i32;
     b = (util::clamp(f64::sqrt(b as f64 * scale), 0.0, 0.999) * 256.0) as i32;
 
-    out.write(format!("{} {} {}\n", r, g, b).as_bytes())?;
+    out.write(&r.to_ne_bytes()[..1])?;
+    out.write(&g.to_ne_bytes()[..1])?;
+    out.write(&b.to_ne_bytes()[..1])?;
     out.flush()
 }
