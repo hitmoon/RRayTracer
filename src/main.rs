@@ -40,7 +40,6 @@ fn random_scene() -> World {
     let ground = Arc::new(Lambertian::new(&Color::from(0.5, 0.5, 0.5)));
     world.add(Box::new(Sphere::from(&Point3::from(0.0, -1000.0, 0.0), 1000.0, ground)));
 
-    /*
     for a in -11..11 {
         for b in -11..11 {
             let choose_mat = util::random_double();
@@ -67,7 +66,7 @@ fn random_scene() -> World {
             }
         }
     }
-    */
+
     let mat1 = Arc::new(Dielectric::new(1.5));
     world.add(Box::new(Sphere::from(&Point3::from(0.0, 1.0, 0.0), 1.0, mat1.clone())));
 
@@ -126,9 +125,9 @@ fn main() {
 
     // Image
     let aspect_ratio = 3.0 / 2.0;
-    let image_width = 400;
+    let image_width = 1200;
     let image_height = (image_width as f64 / aspect_ratio) as i32;
-    let samples_per_pixel: i32 = 100;
+    let samples_per_pixel: i32 = 500;
     let max_depth = 50;
 
     // World
