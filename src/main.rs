@@ -10,6 +10,10 @@ use material::Metal;
 use material::Dielectric;
 use std::rc::Rc;
 use std::f64;
+use std::env;
+use std::fs::File;
+use std::path::Path;
+
 mod vec3;
 mod color;
 mod ray;
@@ -26,6 +30,7 @@ fn random_scene() -> World {
     let ground = Rc::new(Lambertian::new(&Color::from(0.5, 0.5, 0.5)));
     world.add(Box::new(Sphere::from(&Point3::from(0.0, -1000.0, 0.0), 1000.0, ground)));
 
+    /*
     for a in -11..11 {
         for b in -11..11 {
             let choose_mat = util::random_double();
@@ -52,7 +57,7 @@ fn random_scene() -> World {
             }
         }
     }
-
+    */
     let mat1 = Rc::new(Dielectric::new(1.5));
     world.add(Box::new(Sphere::from(&Point3::from(0.0, 1.0, 0.0), 1.0, mat1.clone())));
 
@@ -66,11 +71,25 @@ fn random_scene() -> World {
 }
 
 fn main() {
+
+    let v: Vec<String> = env::args().collect();
+    if v.len() < 2 {
+        eprint!("Usage: {} <ppm image file>\n", v[0]);
+        std::process::exit(0);
+    }
+
+    print!("output file: {}\n", v[1]);
+    let path = Path::new(&v[1]);
+    let mut file = match File::create(&path) {
+        Err(why) => panic!("couldn't open {}: {}", path.display(), why),
+        Ok(file) => file,
+    };
+
     // Image
     let aspect_ratio = 3.0 / 2.0;
-    let image_width = 1200;
+    let image_width = 400;
     let image_height = (image_width as f64 / aspect_ratio) as i32;
-    let samples_per_pixel: i32 = 500;
+    let samples_per_pixel: i32 = 100;
     let max_depth = 50;
 
     // World
@@ -86,7 +105,7 @@ fn main() {
 
     // Render
 
-    print!("P3\n{} {}\n255\n", image_width, image_height);
+    file.write(format!("P6\n{} {}\n255\n", image_width, image_height).as_bytes());
 
     for j in (0..image_height).rev() {
         eprint!("\rScanlines remaining: {}", j);
@@ -101,7 +120,7 @@ fn main() {
                 let r = cam.get_ray(u, v);
                 pixel_color = pixel_color + r.ray_color(&world, max_depth);
             }
-            color::write_color(&mut std::io::stdout(), pixel_color, samples_per_pixel).unwrap();
+            color::write_color(&mut file, pixel_color, samples_per_pixel).unwrap();
         }
     }
 
