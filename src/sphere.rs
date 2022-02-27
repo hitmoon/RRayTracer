@@ -3,17 +3,17 @@ use crate::ray::Ray;
 use crate::hittable::Hittable;
 use crate::hittable::HitRecord;
 use crate::material::Material;
-use std::rc::Rc;
+use std::sync::Arc;
 
 pub struct Sphere {
     center: Point3,
     radius: f64,
-    mat: Rc<dyn Material>
+    mat: Arc<dyn Material + Send + Sync>
 }
 
 impl Sphere {
 
-    pub fn from(cen: &Point3, r: f64, mat: Rc<dyn Material>) -> Sphere {
+    pub fn from(cen: &Point3, r: f64, mat: Arc<dyn Material + Send + Sync>) -> Sphere {
         Sphere { center: cen.clone(), radius: r, mat}
     }
 }

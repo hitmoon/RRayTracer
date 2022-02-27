@@ -2,18 +2,18 @@ use crate::ray::Ray;
 use crate::vec3::Point3;
 use crate::vec3::Vec3;
 use crate::material::Material;
-use std::rc::Rc;
+use std::sync::Arc;
 
 pub struct HitRecord {
     pub p: Point3,
     pub normal: Vec3,
     pub t: f64,
     pub front_face: bool,
-    pub mat: Rc<dyn Material>
+    pub mat: Arc<dyn Material + Send + Sync >
 }
 
 impl HitRecord {
-    pub fn new(p: Point3, normal: Vec3, t: f64, mat: Rc<dyn Material>) -> Self {
+    pub fn new(p: Point3, normal: Vec3, t: f64, mat: Arc<dyn Material + Send + Sync>) -> Self {
         Self { p, normal, t, front_face: false, mat}
     }
 

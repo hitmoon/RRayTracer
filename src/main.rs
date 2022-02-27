@@ -1,4 +1,4 @@
-use std::io::{self, Write};
+use std::io::Write;
 use vec3::Point3;
 use vec3::Vec3;
 use sphere::Sphere;
@@ -8,12 +8,12 @@ use vec3::Color;
 use material::Lambertian;
 use material::Metal;
 use material::Dielectric;
-use std::rc::Rc;
-use std::sync::Arc;
+use std::sync::{Arc,Mutex};
 use std::f64;
 use std::env;
 use std::fs::File;
 use std::path::Path;
+use rayon::prelude::*;
 
 mod vec3;
 mod color;
@@ -37,7 +37,7 @@ struct ImageConfig {
 fn random_scene() -> World {
 
     let mut world = World::new();
-    let ground = Rc::new(Lambertian::new(&Color::from(0.5, 0.5, 0.5)));
+    let ground = Arc::new(Lambertian::new(&Color::from(0.5, 0.5, 0.5)));
     world.add(Box::new(Sphere::from(&Point3::from(0.0, -1000.0, 0.0), 1000.0, ground)));
 
     /*
@@ -51,36 +51,36 @@ fn random_scene() -> World {
                 if choose_mat < 0.8 {
                     // diffuse
                     let albedo = Color::random() * Color::random();
-                    let material = Rc::new(Lambertian::new(&albedo));
+                    let material = Arc::new(Lambertian::new(&albedo));
                     world.add(Box::new(Sphere::from(&center, 0.2, material.clone())));
                 } else if choose_mat < 0.95 {
                     // metal
                     let albedo = Color::random_range(0.5, 1.0);
                     let fuzz = util::random_double_range(0.0, 0.5);
-                    let material = Rc::new(Metal::new(&albedo, fuzz));
+                    let material = Arc::new(Metal::new(&albedo, fuzz));
                     world.add(Box::new(Sphere::from(&center, 0.2, material.clone())));
                 } else {
                     // glass
-                    let material = Rc::new(Dielectric::new(1.5));
+                    let material = Arc::new(Dielectric::new(1.5));
                     world.add(Box::new(Sphere::from(&center, 0.2, material.clone())));
                 }
             }
         }
     }
     */
-    let mat1 = Rc::new(Dielectric::new(1.5));
+    let mat1 = Arc::new(Dielectric::new(1.5));
     world.add(Box::new(Sphere::from(&Point3::from(0.0, 1.0, 0.0), 1.0, mat1.clone())));
 
-    let mat2 = Rc::new(Lambertian::new(&Color::from(0.4, 0.2, 0.1)));
+    let mat2 = Arc::new(Lambertian::new(&Color::from(0.4, 0.2, 0.1)));
     world.add(Box::new(Sphere::from(&Point3::from(-4.0, 1.0, 0.0), 1.0, mat2.clone())));
 
-    let mat3 = Rc::new(Metal::new(&Color::from(0.7, 0.6, 0.5), 0.0));
+    let mat3 = Arc::new(Metal::new(&Color::from(0.7, 0.6, 0.5), 0.0));
     world.add(Box::new(Sphere::from(&Point3::from(4.0, 1.0, 0.0), 1.0, mat3.clone())));
 
     world
 }
 
-fn image_write_row(row: i32, config: &ImageConfig, f: &mut File) -> Result<(), std::io::Error> {
+fn image_write_row(row: i32, config: &ImageConfig, f: Arc<Mutex<&mut File>>) -> Result<(), std::io::Error> {
 
     let image_width = config.width;
     let image_height = config.height;
@@ -102,7 +102,8 @@ fn image_write_row(row: i32, config: &ImageConfig, f: &mut File) -> Result<(), s
             let r = cam.get_ray(u, v);
             pixel_color = pixel_color + r.ray_color(world, max_depth);
         }
-        color::write_color(f, offset + (i * 3) as u64, pixel_color, samples_per_pixel).unwrap();
+        let mut file = f.lock().unwrap();
+        color::write_color(*file , offset + (i * 3) as u64, pixel_color, samples_per_pixel).unwrap();
     }
 
     Ok(())
@@ -116,7 +117,7 @@ fn main() {
         std::process::exit(0);
     }
 
-    print!("output file: {}\n", v[1]);
+    print!("Output file: {}\n", v[1]);
     let path = Path::new(&v[1]);
     let mut file = match File::create(&path) {
         Err(why) => panic!("couldn't open {}: {}", path.display(), why),
@@ -144,12 +145,16 @@ fn main() {
     let cfg = ImageConfig { world: world.clone(), cam: cam.clone(), width: image_width, height: image_height, max_depth, samples_per_pixel };
 
     // Render
-    file.write(format!("P6\n{} {}\n255\n", image_width, image_height).as_bytes());
+    file.write(format!("P6\n{} {}\n255\n", image_width, image_height).as_bytes()).unwrap();
 
-    for j in (0..image_height).rev() {
-        eprint!("\rScanlines remaining: {}", j);
-        image_write_row(image_height -1 - j, &cfg, &mut file);
-    }
-
+    let f = Arc::new(Mutex::new(&mut file));
+    eprint!("Generating with multi core, please wait ...\n");
+    (0..image_height).into_par_iter()
+        .for_each(|idx| {
+            match image_write_row(idx, &cfg, f.clone()) {
+                Ok(()) => (),
+                Err(e) => panic!("write row error {}", e),
+            }
+         });
     eprint!("\nDone.\n");
 }
