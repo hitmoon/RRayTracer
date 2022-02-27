@@ -9,6 +9,7 @@ use material::Lambertian;
 use material::Metal;
 use material::Dielectric;
 use std::rc::Rc;
+use std::sync::Arc;
 use std::f64;
 use std::env;
 use std::fs::File;
@@ -23,6 +24,15 @@ mod world;
 mod util;
 mod camera;
 mod material;
+
+struct ImageConfig {
+    world: Arc<World>,
+    cam: Arc<Camera>,
+    width: i32,
+    height: i32,
+    max_depth: i32,
+    samples_per_pixel: i32
+}
 
 fn random_scene() -> World {
 
@@ -70,6 +80,34 @@ fn random_scene() -> World {
     world
 }
 
+fn image_write_row(row: i32, config: &ImageConfig, f: &mut File) -> Result<(), std::io::Error> {
+
+    let image_width = config.width;
+    let image_height = config.height;
+    let cam = &(*config.cam);
+    let world = &(*config.world);
+    let max_depth = config.max_depth;
+    let samples_per_pixel = config.samples_per_pixel;
+
+    let hdr_len = format!("P6\n{} {}\n255\n", image_width, image_height).len();
+    let j = image_height - 1 - row;
+    let offset = (hdr_len as i32 + row * (image_width * 3)) as u64;
+
+    for i in 0..image_width {
+        let mut pixel_color = Color::new();
+
+        for _s in 0..samples_per_pixel {
+            let u = (i as f64 + util::random_double()) / (image_width - 1) as f64;
+            let v = (j as f64 + util::random_double()) / (image_height - 1) as f64;
+            let r = cam.get_ray(u, v);
+            pixel_color = pixel_color + r.ray_color(world, max_depth);
+        }
+        color::write_color(f, offset + (i * 3) as u64, pixel_color, samples_per_pixel).unwrap();
+    }
+
+    Ok(())
+}
+
 fn main() {
 
     let v: Vec<String> = env::args().collect();
@@ -93,7 +131,7 @@ fn main() {
     let max_depth = 50;
 
     // World
-    let world = random_scene();
+    let world = Arc::new(random_scene());
 
     // Camera
     let lookfrom = Point3::from(13.0, 2.0, 3.0);
@@ -101,27 +139,16 @@ fn main() {
     let vup = Vec3::from(0.0, 1.0, 0.0);
     let dist_to_focus = 10.0;
     let aperture = 0.1;
-    let cam = Camera::new(&lookfrom, &lookat, &vup, 20.0, aspect_ratio, aperture, dist_to_focus);
+    let cam = Arc::new(Camera::new(&lookfrom, &lookat, &vup, 20.0, aspect_ratio, aperture, dist_to_focus));
+
+    let cfg = ImageConfig { world: world.clone(), cam: cam.clone(), width: image_width, height: image_height, max_depth, samples_per_pixel };
 
     // Render
-
     file.write(format!("P6\n{} {}\n255\n", image_width, image_height).as_bytes());
 
     for j in (0..image_height).rev() {
         eprint!("\rScanlines remaining: {}", j);
-        io::stderr().flush().unwrap();
-        for i in 0..image_width {
-
-            let mut pixel_color = Color::new();
-
-            for _s in 0..samples_per_pixel {
-                let u = (i as f64 + util::random_double()) / (image_width - 1) as f64;
-                let v = (j as f64 + util::random_double()) / (image_height - 1) as f64;
-                let r = cam.get_ray(u, v);
-                pixel_color = pixel_color + r.ray_color(&world, max_depth);
-            }
-            color::write_color(&mut file, pixel_color, samples_per_pixel).unwrap();
-        }
+        image_write_row(image_height -1 - j, &cfg, &mut file);
     }
 
     eprint!("\nDone.\n");

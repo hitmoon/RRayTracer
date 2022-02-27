@@ -1,8 +1,10 @@
 use std::io::Write;
 use crate::vec3::Color;
 use crate::util;
+use std::io::Seek;
+use std::io::SeekFrom;
 
-pub fn write_color<T> (out: &mut T, pixel_color: Color, samples_per_pixel: i32) -> std::io::Result<()> where T: Write {
+pub fn write_color<T: Seek> (out: &mut T, offset: u64, pixel_color: Color, samples_per_pixel: i32) -> std::io::Result<()> where T: Write {
     let mut r = pixel_color.x() as i32;
     let mut g = pixel_color.y() as i32;
     let mut b = pixel_color.z() as i32;
@@ -15,6 +17,7 @@ pub fn write_color<T> (out: &mut T, pixel_color: Color, samples_per_pixel: i32) 
     g = (util::clamp(f64::sqrt(g as f64 * scale), 0.0, 0.999) * 256.0) as i32;
     b = (util::clamp(f64::sqrt(b as f64 * scale), 0.0, 0.999) * 256.0) as i32;
 
+    out.seek(SeekFrom::Start(offset));
     out.write(&r.to_ne_bytes()[..1])?;
     out.write(&g.to_ne_bytes()[..1])?;
     out.write(&b.to_ne_bytes()[..1])?;
