@@ -79,7 +79,7 @@ fn random_scene() -> World {
     world
 }
 
-fn image_write_row(row: i32, config: &ImageConfig, f: Arc<Mutex<&mut File>>) -> Result<(), std::io::Error> {
+fn image_write_row(row: i32, config: &ImageConfig, buf: Arc<Mutex<&mut Vec<Vec<u8>>>>) -> Result<(), std::io::Error> {
 
     let image_width = config.width;
     let image_height = config.height;
@@ -88,9 +88,9 @@ fn image_write_row(row: i32, config: &ImageConfig, f: Arc<Mutex<&mut File>>) -> 
     let max_depth = config.max_depth;
     let samples_per_pixel = config.samples_per_pixel;
 
-    let hdr_len = format!("P6\n{} {}\n255\n", image_width, image_height).len();
     let j = image_height - 1 - row;
-    let offset = (hdr_len as i32 + row * (image_width * 3)) as u64;
+
+    let mut tmp = vec![0_u8; (image_width * 3).try_into().unwrap()];
 
     for i in 0..image_width {
         let mut pixel_color = Color::new();
@@ -101,9 +101,13 @@ fn image_write_row(row: i32, config: &ImageConfig, f: Arc<Mutex<&mut File>>) -> 
             let r = cam.get_ray(u, v);
             pixel_color = pixel_color + r.ray_color(world, max_depth);
         }
-        let mut file = f.lock().unwrap();
-        color::write_color(*file , offset + (i * 3) as u64, pixel_color, samples_per_pixel).unwrap();
+
+        color::write_color(&mut tmp, (i as usize).try_into().unwrap(), pixel_color, samples_per_pixel).unwrap();
     }
+
+    // copy the row data
+    let mut b = buf.lock().unwrap();
+    b[row as usize] = tmp;
 
     Ok(())
 }
@@ -143,17 +147,28 @@ fn main() {
 
     let cfg = ImageConfig { world: world.clone(), cam: cam.clone(), width: image_width, height: image_height, max_depth, samples_per_pixel };
 
+    let mut img_buf: Vec<Vec<u8>> = vec![vec![]; image_height as usize];
+
     // Render
     file.write(format!("P6\n{} {}\n255\n", image_width, image_height).as_bytes()).unwrap();
 
-    let f = Arc::new(Mutex::new(&mut file));
+    let b = Arc::new(Mutex::new(&mut img_buf));
     eprint!("Generating with multi core, please wait ...\n");
     (0..image_height).into_par_iter()
         .for_each(|idx| {
-            match image_write_row(idx, &cfg, f.clone()) {
+            match image_write_row(idx, &cfg, b.clone()) {
                 Ok(()) => (),
                 Err(e) => panic!("write row error {}", e),
             }
          });
+
+    // write each row data
+    for row in img_buf {
+        for idx in 0..image_width {
+            let s = (idx * 3) as usize;
+            let e = s + 3;
+            file.write(&row[s..e]).unwrap();
+        }
+    }
     eprint!("\nDone.\n");
 }
