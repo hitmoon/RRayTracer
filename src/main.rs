@@ -40,28 +40,31 @@ fn random_scene() -> World {
     let ground = Arc::new(Lambertian::new(&Color::from(0.5, 0.5, 0.5)));
     world.add(Box::new(Sphere::from(&Point3::from(0.0, -1000.0, 0.0), 1000.0, ground)));
 
-    for a in -11..11 {
-        for b in -11..11 {
+    for a in -6..6 {
+        for b in -6..6 {
             let choose_mat = util::random_double();
             let center = Point3::from(a as f64 + 0.9 * util::random_double(),
-                                      0.2,
+                                      0.5,
                                       b as f64 + 0.9 * util::random_double());
-            if (center - Point3::from(4.0, 0.2, 0.0)).length() > 0.9 {
-                if choose_mat < 0.8 {
+            if (center - Point3::from(4.0, 0.5, 0.0)).length() > 0.7 {
+                if choose_mat < 0.2 {
                     // diffuse
                     let albedo = Color::random() * Color::random();
                     let material = Arc::new(Lambertian::new(&albedo));
-                    world.add(Box::new(Sphere::from(&center, 0.2, material.clone())));
-                } else if choose_mat < 0.95 {
+                    world.add(Box::new(Sphere::from(&center, 0.2 + util::random_double_range(0.0, 0.2),
+                                        material.clone())));
+                } else if choose_mat < 0.8 {
                     // metal
-                    let albedo = Color::random_range(0.5, 1.0);
+                    let albedo = Color::random_range(0.1, 1.0);
                     let fuzz = util::random_double_range(0.0, 0.5);
                     let material = Arc::new(Metal::new(&albedo, fuzz));
-                    world.add(Box::new(Sphere::from(&center, 0.2, material.clone())));
+                    world.add(Box::new(Sphere::from(&center, 0.2 + util::random_double_range(0.0, 0.6),
+                                        material.clone())));
                 } else {
                     // glass
                     let material = Arc::new(Dielectric::new(1.5));
-                    world.add(Box::new(Sphere::from(&center, 0.2, material.clone())));
+                    world.add(Box::new(Sphere::from(&center, 0.2 + util::random_double_range(0.0, 0.6),
+                                        material.clone())));
                 }
             }
         }
@@ -129,7 +132,7 @@ fn main() {
 
     // Image
     let aspect_ratio = 3.0 / 2.0;
-    let image_width = 1200;
+    let image_width = 800;
     let image_height = (image_width as f64 / aspect_ratio) as i32;
     let samples_per_pixel: i32 = 500;
     let max_depth = 50;
@@ -138,7 +141,7 @@ fn main() {
     let world = Arc::new(random_scene());
 
     // Camera
-    let lookfrom = Point3::from(13.0, 2.0, 3.0);
+    let lookfrom = Point3::from(0.0, 5.0, 18.0);
     let lookat = Point3::from(0.0, 0.0, 0.0);
     let vup = Vec3::from(0.0, 1.0, 0.0);
     let dist_to_focus = 10.0;
