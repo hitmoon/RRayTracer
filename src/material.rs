@@ -14,7 +14,7 @@ pub struct Lambertian {
 }
 
 impl Material for Lambertian {
-    fn scatter(&self, r_in: &Ray, rec: &HitRecord, attenuation: &mut Color, scattered: &mut Ray) -> bool {
+    fn scatter(&self, _r_in: &Ray, rec: &HitRecord, attenuation: &mut Color, scattered: &mut Ray) -> bool {
         let mut scatter_direction = rec.normal + Vec3::random_unit_vector();
 
         // Catch degenerate scatter direction
@@ -59,6 +59,7 @@ pub struct Dielectric {
     ir: f64
 }
 
+#[allow(unused_assignments)]
 impl Material for Dielectric {
 
     fn scatter(&self, r_in: &Ray, rec: &HitRecord, attenuation: &mut Color, scattered: &mut Ray) -> bool {
