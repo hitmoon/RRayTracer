@@ -6,6 +6,7 @@ pub struct World {
     objects: Vec<Box<dyn Hittable + Sync + Send>>
 }
 
+#[allow(dead_code)]
 impl World {
 
     pub fn new() -> World {
