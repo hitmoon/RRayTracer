@@ -157,12 +157,14 @@ fn main() {
 
     let b = Arc::new(Mutex::new(&mut img_buf));
     eprint!("Generating with multi core, please wait ...\n");
+    eprint!("Total row: {}\nFinished: ", image_height);
     (0..image_height).into_par_iter()
         .for_each(|idx| {
             match image_write_row(idx, &cfg, b.clone()) {
                 Ok(()) => (),
                 Err(e) => panic!("write row error {}", e),
             }
+            eprint!(".");
          });
 
     // write each row data
