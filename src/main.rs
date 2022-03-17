@@ -71,13 +71,13 @@ fn random_scene() -> World {
     }
 
     let mat1 = Arc::new(Dielectric::new(1.5));
-    world.add(Box::new(Sphere::from(&Point3::from(0.0, 1.5, 0.0), 1.5, mat1.clone())));
+    world.add(Box::new(Sphere::from(&Point3::from(0.0, 1.2, 0.0), 1.3, mat1.clone())));
 
     let mat2 = Arc::new(Lambertian::new(&Color::from(0.4, 0.2, 0.1)));
-    world.add(Box::new(Sphere::from(&Point3::from(-4.0, 1.0, 0.0), 1.0, mat2.clone())));
+    world.add(Box::new(Sphere::from(&Point3::from(-2.5, 1.0, 0.0), 1.0, mat2.clone())));
 
     let mat3 = Arc::new(Metal::new(&Color::from(0.7, 0.6, 0.5), 0.0));
-    world.add(Box::new(Sphere::from(&Point3::from(4.0, 1.0, 0.0), 1.0, mat3.clone())));
+    world.add(Box::new(Sphere::from(&Point3::from(2.5, 1.0, 0.0), 1.0, mat3.clone())));
 
     world
 }
@@ -132,7 +132,7 @@ fn main() {
 
     // Image
     let aspect_ratio = 3.0 / 2.0;
-    let image_width = 1200;
+    let image_width = 1500;
     let image_height = (image_width as f64 / aspect_ratio) as i32;
     let samples_per_pixel: i32 = 500;
     let max_depth = 50;
@@ -141,10 +141,10 @@ fn main() {
     let world = Arc::new(random_scene());
 
     // Camera
-    let lookfrom = Point3::from(0.0, 1.5, 20.0);
+    let lookfrom = Point3::from(-2.0, 3.2, 14.0);
     let lookat = Point3::from(0.0, 0.0, 0.0);
     let vup = Vec3::from(0.0, 1.0, 0.0);
-    let dist_to_focus = 21.0;
+    let dist_to_focus = 15.0;
     let aperture = 0.1;
     let cam = Arc::new(Camera::new(&lookfrom, &lookat, &vup, 20.0, aspect_ratio, aperture, dist_to_focus));
 
